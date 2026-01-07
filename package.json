@@ -1,0 +1,21 @@
+{
+  "name": "greenresto",
+  "version": "1.0.0",
+  "description": "Green Resto - Dessert Cart Application",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "serve": "npx http-server . -p 8080"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.5"
+  }
+}
+
+
+

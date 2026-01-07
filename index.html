@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green Resto - Dessert Cart</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="preload" href="assets/fonts/static/RedHatText-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/static/RedHatText-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/static/RedHatText-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <style>
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background-color: #fff;
+      padding: 2.5rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 592px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal__icon {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal__title {
+      color: #260F08;
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal__text {
+      color: #87635A;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .modal__cart {
+      background-color: #FCF8F6;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .modal__item {
+      display: flex;
+      align-items: center;
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .modal__item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .modal__img {
+      width: 48px;
+      height: 48px;
+      border-radius: 4px;
+      margin-right: 1rem;
+    }
+
+    .modal__item-info {
+      flex: 1;
+    }
+
+    .modal__item-name {
+      color: #260F08;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .modal__qty {
+      color: #C73B0F;
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+
+    .modal__item-price {
+      color: #87635A;
+      font-weight: 400;
+    }
+
+    .modal__item-total {
+      font-weight: 600;
+      color: #260F08;
+    }
+
+    .modal__total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .modal__total-text {
+      color: #260F08;
+      font-size: 0.875rem;
+    }
+
+    .modal__total-price {
+      color: #260F08;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .btn--confirm-new {
+      width: 100%;
+      background-color: #C73B0F;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn--confirm-new:hover {
+      background-color: #952C0B;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <main class="main">
+      <section class="desserts-section">
+        <h1 class="desserts-section__title">Desserts</h1>
+        <div class="desserts" id="desserts-section">
+          <!-- Dessert cards will be rendered here -->
+        </div>
+      </section>
+      
+      <aside class="cart" id="cart-section">
+        <h2 class="cart__title">Your Cart (0)</h2>
+        <div class="cart__content" id="cart-content">
+          <!-- Cart items will be rendered here -->
+        </div>
+      </aside>
+    </main>
+
+    <!-- Confirmation Modal Structure -->
+    <div class="modal-overlay" id="confirmation-modal">
+      <div class="modal">
+        <img src="assets/images/icon-order-confirmed.svg" alt="Order Confirmed" class="modal__icon">
+        <h2 class="modal__title">Order Confirmed</h2>
+        <p class="modal__text">We hope you enjoy your food!</p>
+        <div class="modal__cart">
+          <div id="modal-cart-items"></div>
+          <div class="modal__total">
+            <span class="modal__total-text">Order Total</span>
+            <span class="modal__total-price" id="modal-total-value">$0.00</span>
+          </div>
+        </div>
+        <button class="btn btn--confirm-new" onclick="startNewOrder()">Start New Order</button>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="dist/main.js"></script>
+  <script>
+    // Debug: Check if script loaded
+    window.addEventListener('load', () => {
+      console.log('Page loaded');
+      setTimeout(() => {
+        const dessertsSection = document.getElementById('desserts-section');
+        if (dessertsSection && dessertsSection.innerHTML.trim() === '') {
+          console.error('Products not loaded! Check browser console for errors.');
+          dessertsSection.innerHTML = '<p style="color: red; padding: 20px;">Error: Products failed to load. Please check the browser console and ensure you are serving via HTTP server (not file://).</p>';
+        } else {
+          console.log('Products loaded successfully!');
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
